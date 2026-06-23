@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { SESSION_COOKIE, checkCredentials, getSessionSecret } from "@/lib/auth";
+import {
+  SESSION_COOKIE,
+  SESSION_MAX_AGE_SEC,
+  checkCredentials,
+  issueSessionToken,
+} from "@/lib/auth";
 
 export async function POST(req: Request) {
   let body: { user?: string; pass?: string };
@@ -15,13 +20,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
   }
 
+  const token = await issueSessionToken();
+  if (!token) {
+    // Production without SESSION_SECRET (or ADMIN_* unset) — refuse to issue.
+    return NextResponse.json(
+      { error: "Servidor mal configurado: falta SESSION_SECRET" },
+      { status: 500 }
+    );
+  }
+
   const store = await cookies();
-  store.set(SESSION_COOKIE, getSessionSecret(), {
+  store.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: SESSION_MAX_AGE_SEC,
   });
 
   return NextResponse.json({ ok: true });

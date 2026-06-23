@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE, isValidSession } from "@/lib/auth";
+import { SESSION_COOKIE, verifySession } from "@/lib/auth";
 
 // Paths that never require authentication.
 const PUBLIC_PATHS = ["/login", "/api/health", "/api/login"];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
@@ -13,7 +13,7 @@ export function middleware(req: NextRequest) {
   }
 
   const session = req.cookies.get(SESSION_COOKIE)?.value;
-  if (isValidSession(session)) {
+  if (await verifySession(session)) {
     return NextResponse.next();
   }
 
