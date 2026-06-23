@@ -3,13 +3,23 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+// Resolve a post-login redirect target safely. Parsing against the current
+// origin and confirming it matches defeats open-redirect tricks including
+// protocol-relative (`//evil.com`), backslash (`/\evil.com`), and absolute URLs.
+function safeRedirect(raw: string | null): string {
+  if (!raw) return "/";
+  try {
+    const url = new URL(raw, window.location.origin);
+    if (url.origin !== window.location.origin) return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
+}
+
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  // Only allow same-origin relative paths to avoid open redirects
-  // (reject protocol-relative `//evil.com` and absolute URLs).
-  const rawFrom = params.get("from") || "/";
-  const from = rawFrom.startsWith("/") && !rawFrom.startsWith("//") ? rawFrom : "/";
 
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
@@ -27,7 +37,7 @@ function LoginForm() {
         body: JSON.stringify({ user, pass }),
       });
       if (res.ok) {
-        router.push(from);
+        router.push(safeRedirect(params.get("from")));
         router.refresh();
       } else {
         const body = await res.json().catch(() => ({}));
