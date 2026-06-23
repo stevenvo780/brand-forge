@@ -1,0 +1,8 @@
+DONE
+
+Brand Forge — Fase 1 (scaffold) completada y pusheada a main (commit 1d39a70).
+- Next.js 15 (App Router, TS) + Tailwind v4; `npm run build` pasa sin errores.
+- Auth single-user por cookie: /login, middleware protege todo menos /login, /api/health y /api/login.
+  Cookie = token HMAC-SHA256 firmado (no expone el secreto); credenciales/secreto via ADMIN_USER/ADMIN_PASS/SESSION_SECRET.
+- Datos Postgres con `pg`: db/schema.sql (brands/jobs/assets) + db/client.ts (pool lazy); arranca sin DATABASE_URL.
+- UI: lista de marcas, alta (colores/tipografía/textos JSON) y vista; APIs /api/health, /api/brands[/slug], login/logout. README incluido.
