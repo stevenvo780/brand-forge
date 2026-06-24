@@ -344,6 +344,8 @@ const buildBanner: TemplateBuilder = (brand, fields) => {
 
 export const TEMPLATES: Record<string, TemplateBuilder> = {
   "post-cuadrado": buildPostCuadrado,
+  // Alias: "social-post" is the 1080x1080 square post (kept for API/spec compat).
+  "social-post": buildPostCuadrado,
   story: buildStory,
   banner: buildBanner,
 };
