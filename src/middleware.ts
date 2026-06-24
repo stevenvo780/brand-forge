@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySession } from "@/lib/auth";
 
-// Paths that never require authentication.
-const PUBLIC_PATHS = ["/login", "/api/health", "/api/login"];
+// Paths that never require the session cookie. /api/v1 is the public API,
+// authenticated per-request with an X-Api-Key inside the route handlers.
+const PUBLIC_PATHS = ["/login", "/api/health", "/api/login", "/api/v1"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
