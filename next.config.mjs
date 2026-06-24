@@ -2,8 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
-  // pg is a server-only dependency; keep it external to the bundle.
-  serverExternalPackages: ["pg"],
+  // pg + playwright are server-only deps; keep them external to the bundle so
+  // Next does not try to trace/bundle native/runtime modules.
+  serverExternalPackages: ["pg", "playwright", "playwright-core"],
 };
 
 export default nextConfig;
