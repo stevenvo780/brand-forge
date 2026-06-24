@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBrandBySlug, isDbConfigured } from "@/lib/brands";
 import ImageGenerator from "@/components/ImageGenerator";
+import BrandBrief from "@/components/BrandBrief";
 import { TEMPLATE_LIST } from "@/lib/templates";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +76,13 @@ export default async function BrandPage({
             {JSON.stringify(texts, null, 2)}
           </pre>
         </div>
+
+        <BrandBrief
+          slug={brand.slug}
+          initialBrief={
+            (brand.data?.brief as React.ComponentProps<typeof BrandBrief>["initialBrief"]) ?? null
+          }
+        />
 
         <ImageGenerator slug={brand.slug} templates={TEMPLATE_LIST} />
 

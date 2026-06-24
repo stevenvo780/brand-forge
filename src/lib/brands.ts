@@ -39,4 +39,23 @@ export async function createBrand(input: NewBrandInput): Promise<Brand> {
   return rows[0];
 }
 
+/**
+ * Shallow-merge a patch into brands.data (JSONB `||`). Top-level keys in
+ * `patch` overwrite existing ones; other keys are preserved. Returns the
+ * updated brand, or null if the slug does not exist.
+ */
+export async function mergeBrandData(
+  slug: string,
+  patch: Record<string, unknown>
+): Promise<Brand | null> {
+  const { rows } = await query<Brand>(
+    `UPDATE brands
+        SET data = data || $2::jsonb
+      WHERE slug = $1
+      RETURNING id, slug, name, data, created_at`,
+    [slug, JSON.stringify(patch)]
+  );
+  return rows[0] ?? null;
+}
+
 export { isDbConfigured };
