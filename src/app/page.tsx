@@ -29,6 +29,12 @@ export default async function HomePage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/crm/orgs"
+            className="rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:bg-neutral-800"
+          >
+            CRM
+          </Link>
+          <Link
             href="/brands/new"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
           >
