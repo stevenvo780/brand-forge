@@ -29,6 +29,9 @@ export default async function OrgsPage() {
         <Link href="/crm/contacts" className="ml-auto hover:text-neutral-200">
           Contactos →
         </Link>
+        <Link href="/crm/campaigns" className="hover:text-neutral-200">
+          Campañas →
+        </Link>
       </div>
 
       <header className="mb-6 flex items-center justify-between">

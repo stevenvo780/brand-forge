@@ -77,3 +77,42 @@ ALTER TABLE brands ADD COLUMN IF NOT EXISTS org_id UUID REFERENCES orgs(id) ON D
 CREATE INDEX IF NOT EXISTS idx_contacts_org_id  ON contacts(org_id);
 CREATE INDEX IF NOT EXISTS idx_pipelines_org_id ON pipelines(org_id);
 CREATE INDEX IF NOT EXISTS idx_brands_org_id    ON brands(org_id);
+
+-- ---------------------------------------------------------------------------
+-- Phase 5 — Messaging (email now, WhatsApp infra-ready)
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS messages (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id      UUID REFERENCES orgs(id) ON DELETE SET NULL,
+  contact_id  UUID REFERENCES contacts(id) ON DELETE SET NULL,
+  channel     TEXT NOT NULL CHECK (channel IN ('email', 'whatsapp')),
+  subject     TEXT,
+  body        TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'queued', 'sent', 'failed')),
+  error       TEXT,
+  sent_at     TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_org_id     ON messages(org_id);
+CREATE INDEX IF NOT EXISTS idx_messages_contact_id ON messages(contact_id);
+
+-- ---------------------------------------------------------------------------
+-- Phase 7 — Public API keys
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id        UUID REFERENCES orgs(id) ON DELETE CASCADE,
+  name          TEXT NOT NULL,
+  key_hash      TEXT NOT NULL UNIQUE,
+  prefix        TEXT NOT NULL,
+  scopes        TEXT[] NOT NULL DEFAULT '{}',
+  last_used_at  TIMESTAMPTZ,
+  revoked_at    TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
