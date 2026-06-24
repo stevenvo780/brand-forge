@@ -74,7 +74,8 @@ async function sendViaResend(to: string, subject: string, body: string): Promise
         // Minimal HTML wrapper preserving line breaks.
         html: `<div style="font-family:sans-serif;white-space:pre-wrap">${body
           .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")}</div>`,
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")}</div>`,
         text: body,
       }),
     });

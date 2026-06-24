@@ -148,26 +148,33 @@ function encodeMp4(dir: string, fps: number, outPath: string): Promise<void> {
 
 /** Full pipeline for a queued reel job: render → encode → upload → record asset. */
 export async function processReelJob(job: Job): Promise<string> {
-  const params = job.params as unknown as ReelParams;
-  const duration = Math.min(15, Math.max(2, Number(params.duration) || 5));
-  const frameCount = Math.round(duration * FPS);
-
-  const { rows: brandRows } = await query<Brand>(
-    `SELECT id, slug, name, data, created_at FROM brands WHERE id = $1`,
-    [job.brand_id]
-  );
-  const brand = brandRows[0];
-  if (!brand) throw new Error("Marca no encontrada para el job");
-
-  const html = buildReelHtml(brand, {
-    duration,
-    style: params.style,
-    text: params.text || brand.name,
-  });
-
-  const dir = await mkdtemp(join(tmpdir(), "reel-"));
-  const outPath = join(dir, "reel.mp4");
+  // Mark processing up-front and wrap the WHOLE pipeline so ANY failure
+  // (brand lookup, mkdtemp, render, encode, upload) records 'failed' — a job
+  // can never get silently stranded in 'queued'/'processing'.
+  let dir: string | null = null;
   try {
+    await setJobStatus(job.id, "processing");
+
+    const params = job.params as unknown as ReelParams;
+    const duration = Math.min(15, Math.max(2, Number(params.duration) || 5));
+    const frameCount = Math.round(duration * FPS);
+
+    const { rows: brandRows } = await query<Brand>(
+      `SELECT id, slug, name, data, created_at FROM brands WHERE id = $1`,
+      [job.brand_id]
+    );
+    const brand = brandRows[0];
+    if (!brand) throw new Error("Marca no encontrada para el job");
+
+    const html = buildReelHtml(brand, {
+      duration,
+      style: params.style,
+      text: params.text || brand.name,
+    });
+
+    dir = await mkdtemp(join(tmpdir(), "reel-"));
+    const outPath = join(dir, "reel.mp4");
+
     await renderFrames(html, frameCount, dir);
     await encodeMp4(dir, FPS, outPath);
 
@@ -184,10 +191,10 @@ export async function processReelJob(job: Job): Promise<string> {
     await setJobStatus(job.id, "done", { url, duration, frames: frameCount });
     return url;
   } catch (e) {
-    await setJobStatus(job.id, "failed", { error: (e as Error).message });
+    await setJobStatus(job.id, "failed", { error: (e as Error).message }).catch(() => {});
     throw e;
   } finally {
-    await rm(dir, { recursive: true, force: true });
+    if (dir) await rm(dir, { recursive: true, force: true });
   }
 }
 

@@ -51,7 +51,7 @@ export async function POST(
 
   try {
     const asset = await generateBrandImage(slug, template, fields);
-    return NextResponse.json({ asset }, { status: 201 });
+    return NextResponse.json({ asset, url: asset.url }, { status: 201 });
   } catch (e) {
     const msg = (e as Error).message;
     const status = /no encontrada/i.test(msg) ? 404 : 500;

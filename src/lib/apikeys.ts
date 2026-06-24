@@ -80,7 +80,10 @@ export async function verifyApiKey(raw: string | null, scope: ApiScope): Promise
   if (!key.scopes.includes(scope)) {
     return { ok: false, status: 403, error: `La key no tiene el scope ${scope}` };
   }
-  // Fire-and-forget usage bump; failure must not block the request.
-  query(`UPDATE api_keys SET last_used_at = now() WHERE id = $1`, [key.id]).catch(() => {});
+  // Fire-and-forget usage bump; failure must not block the request, but log it
+  // so DB issues (e.g. pool exhaustion) are still observable.
+  query(`UPDATE api_keys SET last_used_at = now() WHERE id = $1`, [key.id]).catch((e) =>
+    console.warn("[apikeys] last_used_at bump falló:", (e as Error).message)
+  );
   return { ok: true, key };
 }

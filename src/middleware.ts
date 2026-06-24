@@ -4,7 +4,7 @@ import { SESSION_COOKIE, verifySession } from "@/lib/auth";
 
 // Paths that never require the session cookie. /api/v1 is the public API,
 // authenticated per-request with an X-Api-Key inside the route handlers.
-const PUBLIC_PATHS = ["/login", "/api/health", "/api/login", "/api/v1"];
+const PUBLIC_PATHS = ["/login", "/api/health", "/api/login", "/api/auth/login", "/api/v1"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

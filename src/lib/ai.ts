@@ -131,11 +131,12 @@ export async function brandBrief(params: BriefParams): Promise<BrandBrief> {
     throw new Error("GEMINI_API_KEY no está configurada");
   }
   const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // Key goes in a header (not the querystring) to keep it out of request logs.
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
     body: JSON.stringify({
       contents: [{ parts: [{ text: buildPrompt(params) }] }],
       generationConfig: {
