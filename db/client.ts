@@ -11,7 +11,15 @@ export function isDbConfigured(): boolean {
 export function getPool(): Pool | null {
   if (!isDbConfigured()) return null;
   if (!pool) {
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const connectionString = process.env.DATABASE_URL as string;
+    // Cloud SQL public IP enforces SSL (hostssl in pg_hba). The server cert is
+    // Google-managed; we encrypt in transit without pinning the CA for the MVP.
+    const isLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(connectionString);
+    const ssl =
+      process.env.DB_SSL === "false" || isLocal
+        ? undefined
+        : { rejectUnauthorized: false };
+    pool = new Pool({ connectionString, ssl });
   }
   return pool;
 }
