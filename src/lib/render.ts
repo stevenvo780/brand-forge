@@ -10,7 +10,7 @@ const LAUNCH_ARGS = [
   "--disable-dev-shm-usage",
 ];
 
-async function getBrowser(): Promise<Browser> {
+export async function getBrowser(): Promise<Browser> {
   if (!browserPromise) {
     browserPromise = chromium.launch({ headless: true, args: LAUNCH_ARGS });
   }

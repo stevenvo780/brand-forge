@@ -45,7 +45,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /ms-playwright /ms-playwright
 
 # Install the chromium OS libraries in this final image.
+# Chromium OS libraries (Playwright) + ffmpeg (reel encoding, Phase 6).
 RUN npx playwright install-deps chromium && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8080

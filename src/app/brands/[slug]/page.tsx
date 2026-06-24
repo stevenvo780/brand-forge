@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBrandBySlug, isDbConfigured } from "@/lib/brands";
 import ImageGenerator from "@/components/ImageGenerator";
 import BrandBrief from "@/components/BrandBrief";
+import ReelGenerator from "@/components/ReelGenerator";
 import { TEMPLATE_LIST } from "@/lib/templates";
 
 export const dynamic = "force-dynamic";
@@ -85,6 +86,8 @@ export default async function BrandPage({
         />
 
         <ImageGenerator slug={brand.slug} templates={TEMPLATE_LIST} />
+
+        <ReelGenerator slug={brand.slug} />
 
         <details className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-5">
           <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-neutral-400">
